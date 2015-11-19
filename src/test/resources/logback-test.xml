@@ -1,0 +1,18 @@
+<configuration scan="true">
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} %-5level %logger:%L - %msg%n</Pattern>
+        </layout>
+    </appender>
+
+    <logger name="org.hibernate" level="error"/>
+    <logger name="org.springframework" level="info"/>
+    <logger name="com.biard.batch" level="trace"/>
+    <logger name="WATCH PAGE" level="info"/>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>

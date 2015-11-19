@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+                                http://www.springframework.org/schema/batch   
+                                http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
+
+    <job id="hellojob" xmlns="http://www.springframework.org/schema/batch">
+        <step id="simpleChunkJSonSample">
+            <tasklet>
+                <chunk reader="jSonMultiResourceItemReader" processor="jSonToOrderItemProcessor"
+                       writer="ordersItemWriter" commit-interval="3" skip-limit="2">
+                    <streams>
+                        <stream ref="jSonToOrderItemProcessor"/>
+                    </streams>
+                    <skippable-exception-classes>
+                        <include class="org.springframework.batch.item.file.FlatFileParseException"/>
+                    </skippable-exception-classes>
+                </chunk>
+                <listeners>
+                    <listener ref="changeExitStatusExecutionListener"/>
+                </listeners>
+            </tasklet>
+            <end on="FAILED"/>
+            <next on="*" to="searchfile"/>
+        </step>
+        <step id="searchfile">
+            <tasklet>
+                <chunk reader="multiResourceItemReader" writer="orderItemWriter" commit-interval="3" skip-limit="2">
+                    <skippable-exception-classes>
+                        <include class="org.springframework.batch.item.file.FlatFileParseException"/>
+                    </skippable-exception-classes>
+                </chunk>
+            </tasklet>
+            <next on="*" to="orderprocessor"/>
+        </step>
+        <step id="orderprocessor">
+            <tasklet>
+                <chunk reader="flatFileItemReader" writer="orderItemWriter" commit-interval="3" skip-limit="2">
+                    <skippable-exception-classes>
+                        <include class="org.springframework.batch.item.file.FlatFileParseException"/>
+                    </skippable-exception-classes>
+                </chunk>
+            </tasklet>
+        </step>
+        <listeners>
+            <listener ref="jobListener"/>
+        </listeners>
+    </job>
+
+    <bean id="flatFileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+        <property name="resource" value="file:///#{jobParameters[input]}/orders.csv"/>
+        <property name="linesToSkip" value="1"/>
+        <property name="strict" value="false"/>
+        <property name="lineMapper">
+            <bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <property name="lineTokenizer">
+                    <bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+                        <property name="names" value="CUST_ID,ORDERNUM,COUNTRY"/>
+                        <property name="delimiter" value=","/>
+                    </bean>
+                </property>
+                <property name="fieldSetMapper">
+                    <bean class="com.biard.batch.mapper.OrderDataMapper"/>
+                </property>
+            </bean>
+        </property>
+    </bean>
+    <bean id="multiResourceItemReader" class="org.springframework.batch.item.file.MultiResourceItemReader" scope="step">
+        <property name="resources" value="file:///#{jobParameters[input]}/*.csv"/>
+        <property name="delegate" ref="flatFileItemReader"/>
+    </bean>
+    <bean id="orderItemWriter" class="com.biard.batch.writer.OrderItemWriter">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+    <bean id="jSonflatFileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+        <!--This property is set to MultiResourceItemReader-->
+        <!--<property name="resource" value="classpath:input/orders.csv"/>-->
+        <property name="linesToSkip" value="0"/>
+        <property name="recordSeparatorPolicy">
+            <bean class="org.springframework.batch.item.file.separator.JsonRecordSeparatorPolicy"/>
+        </property>
+        <property name="lineMapper">
+            <bean class="com.biard.batch.mapper.JSonResourceLineMapper"/>
+        </property>
+    </bean>
+    <bean id="jSonMultiResourceItemReader" class="org.springframework.batch.item.file.MultiResourceItemReader"
+          scope="step">
+        <property name="resources" value="file:///#{jobParameters[input]}/*.json"/>
+        <property name="delegate" ref="jSonflatFileItemReader"/>
+    </bean>
+    <bean id="jSonToOrderItemProcessor" class="com.biard.batch.processor.JSonToOrderItemProcessor">
+        <property name="pattern" value="-(.*?)\."/>
+    </bean>
+    <bean id="ordersItemWriter" class="com.biard.batch.writer.OrdersItemWriter">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+    <bean id="changeExitStatusExecutionListener" class="com.biard.batch.listener.ChangeExitStatusExecutionListener"/>
+    <bean id="jobListener" class="com.biard.batch.listener.JobListener"/>
+
+</beans>

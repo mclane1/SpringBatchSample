@@ -1,0 +1,23 @@
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+    <!-- connect to MySQL database -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!-- create job-meta tables automatically
+         In production you don't need to create this every time.
+         Just create once in production.
+    -->
+    <!--<jdbc:initialize-database data-source="dataSource">-->
+    <!--<jdbc:script location="org/springframework/batch/core/schema-drop-mysql.sql" />-->
+    <!--<jdbc:script location="scripts/create.sql" />-->
+    <!--</jdbc:initialize-database>-->
+
+</beans>

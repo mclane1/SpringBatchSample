@@ -1,0 +1,50 @@
+{
+  "fruits": [
+    {
+      "kiwis": 3,
+      "mangues": 4,
+      "pommes": null
+    },
+    {
+      "panier": true
+    }
+  ],
+  "legumes": {
+    "patates": "amandine",
+    "poireaux": false
+  },
+  "viandes": [
+    "poisson",
+    "poulet",
+    "boeuf"
+  ],
+  "orders": [
+    {
+      "order10": {
+        "custId": 10,
+        "orderNum": "BE001",
+        "country": "Canada"
+      },
+      "order11": {
+        "custId": 11,
+        "orderNum": "BE002",
+        "country": "Canada"
+      },
+      "order12": {
+        "custId": 12,
+        "orderNum": "CE001",
+        "country": "India"
+      },
+      "order13": {
+        "custId": 13,
+        "orderNum": "CE002",
+        "country": "Canada"
+      },
+      "order14": {
+        "custId": 14,
+        "orderNum": "CE003",
+        "country": "France"
+      }
+    }
+  ]
+}
